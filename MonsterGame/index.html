@@ -31,7 +31,16 @@
       </section>
       <section id="controls">
         <button v-on:click="attackMonster">ATTACK</button>
-        <button>SPECIAL ATTACK</button>
+        <!-- <button
+          v-bind:disabled="currentRound % 3 !== 0"
+          v-on:click="specialAttackMonster"
+        > -->
+        <button
+          v-bind:disabled="UseSpecialAttack"
+          v-on:click="specialAttackMonster"
+        >
+          SPECIAL ATTACK
+        </button>
         <button>HEAL</button>
         <button>SURRENDER</button>
       </section>
