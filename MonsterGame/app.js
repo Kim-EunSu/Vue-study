@@ -10,15 +10,22 @@ const app = Vue.createApp({
       currentRound: 0,
       // 게임을 처음 시작했을 때는 당연히 승패가 결정되지 않았으므로
       winner: null,
+      logMessages: [],
     };
   },
   computed: {
     MonsterbarStyle() {
+      if (this.monsterHealth < 0) {
+        return { width: "0%" };
+      }
       return {
         width: this.monsterHealth + "%",
       };
     },
     PlayerbarStyle() {
+      if (this.playerHealth < 0) {
+        return { width: "0%" };
+      }
       return {
         width: this.playerHealth + "%",
       };
@@ -28,7 +35,6 @@ const app = Vue.createApp({
     },
   },
   watch: {
-    // 자유롭게 정하는것이 아니라 앞으로 감시할 프로퍼티의 이름
     playerHealth(value) {
       if (value <= 0 && this.monsterHealth <= 0) {
         //무승부
@@ -39,33 +45,39 @@ const app = Vue.createApp({
       }
     },
     monsterHealth(value) {
-      if (value && this.playerHealth <= 0) {
+      if (value <= 0 && this.playerHealth <= 0) {
         //무승부
         this.winner = "draw";
       } else if (value <= 0) {
-        //monster가 짐
         this.winner = "player";
       }
     },
   },
   methods: {
+    startNewGame() {
+      //모든 매개변수 리셋
+      this.playerHealth = 100;
+      this.monsterHealth = 100;
+      this.currentRound = 0;
+      this.winner = null;
+    },
     attackMonster() {
       this.currentRound++;
       const attackValue = getRandomValue(5, 10);
       this.monsterHealth -= attackValue;
+      this.addLogMessage("player", "attack", attackValue);
       this.attackPlayer();
-      if (this.playerHealth < 0) {
-        //player가 게임에서 짐
-      }
     },
     attackPlayer() {
       const attackValue = getRandomValue(8, 15);
       this.playerHealth -= attackValue;
+      this.addLogMessage("monster", "attack", attackValue);
     },
     specialAttackMonster() {
       this.currentRound++;
       const attackValue = getRandomValue(10, 20);
       this.monsterHealth -= attackValue;
+      this.addLogMessage("player", "special-attack", attackValue);
       this.attackPlayer();
     },
     playerHeal() {
@@ -76,7 +88,18 @@ const app = Vue.createApp({
       } else {
         this.playerHealth += healValue;
       }
+      this.addLogMessage("player", "heal", healValue);
       this.attackMonster();
+    },
+    surrender() {
+      this.winner = "monster";
+    },
+    addLogMessage(who, what, value) {
+      this.logMessages.unshift({
+        actionBy: who,
+        actionType: what,
+        actionValue: value,
+      });
     },
   },
 });
